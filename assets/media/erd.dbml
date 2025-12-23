@@ -1,0 +1,35 @@
+
+Enum "ENUM('Male', 'Female', 'Other')" {
+  "Male"
+  "Female"
+  "Other"
+}
+
+Table "patients" {
+  "patient_id" INT [pk, increment]
+  "first_name" VARCHAR(50) [not null]
+  "last_name" VARCHAR(50) [not null]
+  "gender" ENUM('Male', 'Female', 'Other')
+  "date_of_birth" DATE
+  "phone_number" VARCHAR(15) [unique, not null]
+  "email" VARCHAR(100) [unique]
+  "address" VARCHAR(255)
+}
+
+Table "departments" {
+  "department_id" INT [pk, increment]
+  "department_name" VARCHAR(50) [unique, not null]
+  "location" VARCHAR(100) [not null]
+}
+
+Table "doctors" {
+  "doctor_id" INT [pk, increment]
+  "first_name" VARCHAR(50) [not null]
+  "last_name" VARCHAR(50) [not null]
+  "specialiazation" VARCHAR(50)
+  "phone_number" VARCHAR(15) [unique, not null]
+  "email" VARCHAR(100) [unique, not null]
+  "department_id" INT [not null]
+}
+
+Ref "doctors_departements":"departments"."department_id" < "doctors"."department_id"

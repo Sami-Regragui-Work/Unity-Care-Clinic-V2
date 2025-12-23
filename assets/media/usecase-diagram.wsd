@@ -1,0 +1,106 @@
+@startuml
+left to right direction
+
+skinparam {
+  ArrowColor darkred
+  ArrowFontStyle bold
+  FontColor darkred
+  RoundCorner 15
+  ActorFontStyle bold
+  ActorBackgroundColor #FFFACD
+  PackageBackgroundColor #FFFACD
+  PackageBorderColor darkred
+  UseCaseBackgroundColor #FFFACD
+  UseCaseBorderColor darkred
+  UseCaseFontStyle bold
+  UseCaseFontColor darkred
+}
+
+actor "Admin" as Client #LightGreen
+
+rectangle "\nUnity Care Clinic\nBackoffice\n" #FFFACD {
+
+  ' Authentication
+  usecase "login" as UC_login
+
+  ' High-level manage use cases
+  usecase "managePatients" as UC_managePatients
+  usecase "manageDoctors" as UC_manageDoctors
+  usecase "manageDepartments" as UC_manageDepartments
+
+  ' Patients CRUD
+  usecase "createPatient" as UC_createPatient
+  usecase "showPatients" as UC_showPatients
+  usecase "updatePatient" as UC_updatePatient
+  usecase "deletePatient" as UC_deletePatient
+
+  ' Doctors CRUD
+  usecase "createDoctor" as UC_createDoctor
+  usecase "showDoctors" as UC_showDoctors
+  usecase "updateDoctor" as UC_updateDoctor
+  usecase "deleteDoctor" as UC_deleteDoctor
+
+  ' Departments CRUD
+  usecase "createDepartment" as UC_createDepartment
+  usecase "showDepartments" as UC_showDepartments
+  usecase "updateDepartment" as UC_updateDepartment
+  usecase "deleteDepartment" as UC_deleteDepartment
+
+  ' Dashboard
+  usecase "viewDashboardStatistics" as UC_viewDashboardStatistics
+
+  ' Language management
+  usecase "changeLanguage" as UC_changeLanguage
+  usecase "toFrench" as UC_toFrench
+  usecase "toEnglish" as UC_toEnglish
+  usecase "toArabic" as UC_toArabic
+}
+
+' Main actor relations
+Client -[#LightGreen]-> UC_login
+Client -[#LightGreen]-> UC_managePatients
+Client -[#LightGreen]-> UC_manageDoctors
+Client -[#LightGreen]-> UC_manageDepartments
+Client -[#LightGreen]-> UC_viewDashboardStatistics
+Client -[#LightGreen]-> UC_changeLanguage
+
+Client -[hidden]-> UC_manageDoctors
+Client -[hidden]-> UC_manageDoctors
+Client -[hidden]-> UC_changeLanguage
+Client -[hidden]-> UC_manageDoctors
+Client -[hidden]-> UC_toFrench
+Client -[hidden]-> UC_toEnglish
+Client -[hidden]-> UC_toArabic
+UC_login -[hidden]-> UC_toFrench
+
+' All major use cases include login
+UC_managePatients --> UC_login : <<include>>
+UC_manageDoctors --> UC_login : <<include>>
+UC_manageDepartments --> UC_login : <<include>>
+UC_viewDashboardStatistics --> UC_login : <<include>>
+UC_changeLanguage --> UC_login : <<include>>
+
+' Includes: Patients CRUD
+UC_managePatients --> UC_createPatient : <<include>>
+UC_managePatients --> UC_showPatients : <<include>>
+UC_managePatients --> UC_updatePatient : <<include>>
+UC_managePatients --> UC_deletePatient : <<include>>
+
+' Includes: Doctors CRUD
+UC_manageDoctors --> UC_createDoctor : <<include>>
+UC_manageDoctors --> UC_showDoctors : <<include>>
+UC_manageDoctors --> UC_updateDoctor : <<include>>
+UC_manageDoctors --> UC_deleteDoctor : <<include>>
+
+' Includes: Departments CRUD
+UC_manageDepartments --> UC_createDepartment : <<include>>
+UC_manageDepartments --> UC_showDepartments : <<include>>
+UC_manageDepartments --> UC_updateDepartment : <<include>>
+UC_manageDepartments --> UC_deleteDepartment : <<include>>
+
+' Languages - extended from changeLanguage (optional sub-actions)
+UC_toFrench ..> UC_changeLanguage : <<extend>>
+UC_toEnglish ..> UC_changeLanguage : <<extend>>
+UC_toArabic ..> UC_changeLanguage : <<extend>>
+
+@enduml

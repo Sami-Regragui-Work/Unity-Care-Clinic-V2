@@ -4,6 +4,8 @@
 skinparam classAttributeIconSize 0
 skinparam RoundCorner 15
 skinparam Dpi 300
+hide <<spotClass>> stereotype
+
 
 <style>
 spotClass {
@@ -23,46 +25,30 @@ skinparam class {
 }
 
 ' ==========================
-' Infra: BaseModel + PHPValidator
+' Infra: custom BaseModel + Validator
 ' ==========================
 
 class BaseModel <<spotClass>> {
-  # table : string
-  # id_field : string
-  # translation : array
-  # relationships : array
-  # _related : array
-  + loaded : bool
-  # _magicProperties : array
+  - tableName : string
+  - idField : string
 
-  + __construct(id : int)
-  + getAll(conditions : string, data : array) : array
-  + fromArray(row : array) : bool
-  + create() : int
-  + save() : mixed
-  + load(id : int) : bool
-  + loaded() : bool
-  + getWithWhere(where : string, data : array) : bool
+  + save() : bool
   + delete() : bool
-  + update() : bool
-  + __call(method : string, parameters : array) : mixed
-  + __set(property : string, value : mixed) : void
-  + __get(property : string) : mixed
-  + toArray() : array
-  + _hasProperty(name : string) : bool
-  + dump(nice : bool) : void
+  + findById(id : int) : ?BaseModel
+  + getId() : int
+
+  # getTableName() : string
+  # setTableName(name : string) : void
+  # getIdField() : string
+  # setIdField(field : string) : void
 }
 
-class "BlakvGhost\\PHPValidator\\Validator" as PHPValidator <<spotClass>> {
-  - data : array
-  - rules : array
-  - messages : array
-  - lang : string
-
-  + __construct(data : array, rules : array, messages : array, lang : string)
-  + isValid() : bool
-  + getErrors() : array
-  + validated() : array
+class Validator <<spotClass>> {
+  + isValidEmail(email : string) : bool
+  + isValidPhone(phone : string) : bool
+  + isValidDate(date : string) : bool
+  + isNotEmpty(input : string) : bool
+  + sanitize(input : string) : string
 }
 
 ' ==========================
@@ -148,22 +134,19 @@ class Department {
 ' Inheritance relations
 ' ==========================
 
-BaseModel <|-- Table
-Table <|-- Person
+BaseModel <|-- Table : <<inheritance>>
+Table <|-- Person : <<inheritance>>
 
-Table <|-- Patient
-Table <|-- Doctor
-Table <|-- Department
+Table <|-- Patient : <<inheritance>>
+Table <|-- Doctor : <<inheritance>>
+Table <|-- Department : <<inheritance>>
 
-Person <|-- Patient
-Person <|-- Doctor
+Person <|-- Patient : <<inheritance>>
+Person <|-- Doctor : <<inheritance>>
 
-' ==========================
-' Usage of PHPValidator (no inheritance)
-' ==========================
-
-PHPValidator ..> Patient : validates data
-PHPValidator ..> Doctor : validates data
-PHPValidator ..> Department : validates data
+' Validator is used by entities via setters (not inherited)
+Validator ..> Patient : <<composition>> validates input
+Validator ..> Doctor : <<composition>> validates input
+Validator ..> Department : <<composition>> validates input
 
 @enduml
