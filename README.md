@@ -90,7 +90,7 @@ composer require vlucas/phpdotenv
 ```env
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_NAME=uccv2_console
+DB_NAME=uccv2
 DB_USER=root
 DB_PASS=secret
 APP_ENV=local
@@ -102,7 +102,7 @@ APP_DEBUG=true
 ```env
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_NAME=uccv2_console
+DB_NAME=uccv2
 DB_USER=your_user
 DB_PASS=your_password
 APP_ENV=local
@@ -149,11 +149,11 @@ Then in `assets/php/dbLink.php`, read these env vars (`$_ENV['DB_NAME']`, etc.) 
 
 4. **Database setup**
 
-    - Create a database (e.g. `uccv2_console`).
+    - Create a database (e.g. `uccv2`).
     - Import schema and seed data:
         ```bash
-        mysql -u username -p uccv2_console < assets/sql/ddl.sql
-        mysql -u username -p uccv2_console < assets/sql/dml.sql
+        mysql -u <username> -p uccv2 < assets/sql/ddl.sql
+        mysql -u <username> -p uccv2 < assets/sql/dml.sql
         ```
 
 5. **Run the console application**

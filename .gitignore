@@ -1,2 +1,4 @@
 assets/media/class-diagram-overkill.wsd
 assets/media/erd.dbdiagram
+vendor/
+.env
