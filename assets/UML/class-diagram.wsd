@@ -1,0 +1,169 @@
+@startuml
+
+' CLASS THEME (ORIGINAL)
+skinparam classAttributeIconSize 0
+skinparam RoundCorner 15
+skinparam Dpi 300
+
+<style>
+spotClass {
+  BackgroundColor #FFFACD
+  LineColor darkred
+  FontColor darkred
+}
+</style>
+
+skinparam class {
+  BackgroundColor #LightGreen
+  ArrowFontStyle bold
+  ArrowFontSize 16
+  FontStyle bold
+  FontColor darkred
+  AttributeFontSize 18
+}
+
+' ==========================
+' Infra: BaseModel + PHPValidator
+' ==========================
+
+class BaseModel <<spotClass>> {
+  # table : string
+  # id_field : string
+  # translation : array
+  # relationships : array
+  # _related : array
+  + loaded : bool
+  # _magicProperties : array
+
+  + __construct(id : int)
+  + getAll(conditions : string, data : array) : array
+  + fromArray(row : array) : bool
+  + create() : int
+  + save() : mixed
+  + load(id : int) : bool
+  + loaded() : bool
+  + getWithWhere(where : string, data : array) : bool
+  + delete() : bool
+  + update() : bool
+  + __call(method : string, parameters : array) : mixed
+  + __set(property : string, value : mixed) : void
+  + __get(property : string) : mixed
+  + toArray() : array
+  + _hasProperty(name : string) : bool
+  + dump(nice : bool) : void
+}
+
+class "BlakvGhost\\PHPValidator\\Validator" as PHPValidator <<spotClass>> {
+  - data : array
+  - rules : array
+  - messages : array
+  - lang : string
+
+  + __construct(data : array, rules : array, messages : array, lang : string)
+  + isValid() : bool
+  + getErrors() : array
+  + validated() : array
+}
+
+' ==========================
+' Generic / Parent classes
+' ==========================
+
+abstract class Table {
+  - id : int
+
+  # getId() : int
+  # setId(id : int) : void
+
+  + toArray() : array
+  + getDisplayHeaders() : array
+}
+
+abstract class Person {
+  - firstName : string
+  - lastName : string
+  - phone : string
+  - email : string
+  - hireDate : \DateTime
+
+  # getFirstName() : string
+  # setFirstName(firstName : string) : void
+  # getLastName() : string
+  # setLastName(lastName : string) : void
+  # getPhone() : string
+  # setPhone(phone : string) : void
+  # getEmail() : string
+  # setEmail(email : string) : void
+
+  + getFullName() : string
+  + __toString() : string
+}
+
+' ==========================
+' Main entity classes
+' ==========================
+
+class Patient {
+  - birthDate : \DateTime
+  - gender : string
+  - departmentId : int
+
+  # getBirthDate() : \DateTime
+  # setBirthDate(date : \DateTime) : void
+  # getGender() : string
+  # setGender(gender : string) : void
+  # getDepartmentId() : int
+  # setDepartmentId(deptId : int) : void
+
+  + calculateAverageAge() : float
+  + countByDepartment() : array
+}
+
+class Doctor {
+  - speciality : string
+  - departmentId : int
+
+  # getSpeciality() : string
+  # setSpeciality(speciality : string) : void
+  # getDepartmentId() : int
+  # setDepartmentId(deptId : int) : void
+
+  + calculateAverageYearsOfService() : float
+  + findByDepartment(deptId : int) : array
+}
+
+class Department {
+  - name : string
+  - location : string
+
+  # getName() : string
+  # setName(name : string) : void
+  # getLocation() : string
+  # setLocation(location : string) : void
+
+  + getMostPopulated() : Department
+}
+
+' ==========================
+' Inheritance relations
+' ==========================
+
+BaseModel <|-- Table
+Table <|-- Person
+
+Table <|-- Patient
+Table <|-- Doctor
+Table <|-- Department
+
+Person <|-- Patient
+Person <|-- Doctor
+
+' ==========================
+' Usage of PHPValidator (no inheritance)
+' ==========================
+
+PHPValidator ..> Patient : validates data
+PHPValidator ..> Doctor : validates data
+PHPValidator ..> Department : validates data
+
+@enduml
