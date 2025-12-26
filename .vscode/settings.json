@@ -1,0 +1,32 @@
+{
+    "github.copilot.enable": {
+        "*": false,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false
+    },
+    "github.copilot.chat.codeGeneration.enable": false,
+
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.formatOnPaste": true,
+    "prettier.tabWidth": 4,
+    // "prettier.overrides": [
+    //     {
+    //         "files": "*.json",
+    //         "options": { "tabWidth": 2 }
+    //     }
+    // ],
+    "editor.detectIndentation": false,
+    "[php]": {
+        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+    },
+    "[sql]": {
+        "editor.defaultFormatter": null
+    },
+    "sql-formatter.uppercase": true,
+    "sql-formatter.dialect": "pl/sql",
+    "sql-formatter.linesBetweenQueries": 2
+}
