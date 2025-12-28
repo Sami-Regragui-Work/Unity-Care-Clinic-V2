@@ -1,7 +1,7 @@
 USE UCCV2;
 
 -- 15 departments (varied count)
-INSERT INTO departments (department_name, location) VALUES
+INSERT INTO departments (name, location) VALUES
 ('Cardiology','Building A - Floor 3'),
 ('Neurology','Building B - Floor 2'),
 ('Oncology','Building C - Floor 1'),
@@ -19,7 +19,7 @@ INSERT INTO departments (department_name, location) VALUES
 ('Gastroenterology','Building D - Floor 3');
 
 -- 25 doctors (varied count with FK duplications)
-INSERT INTO doctors (first_name, last_name, specialization, phone_number, email, department_id) VALUES
+INSERT INTO doctors (first_name, last_name, specialization, phone, email, department_id) VALUES
 ('James','Adams','Cardiology','0612345001','j.adams@hospital.com',1),
 ('Linda','Baker','Neurology','0623456002','l.baker@hospital.com',2),
 ('Robert','Clark','Oncology','0634567003','r.clark@hospital.com',3),
@@ -47,7 +47,7 @@ INSERT INTO doctors (first_name, last_name, specialization, phone_number, email,
 ('Kevin','Brown','Pediatrics','0656789025','k.brown@hospital.com',4);
 
 -- 30 patients (varied count with some duplicate addresses/locations)
-INSERT INTO patients (first_name, last_name, gender, date_of_birth, phone_number, email, address) VALUES
+INSERT INTO patients (first_name, last_name, gender, date_of_birth, phone, email, address) VALUES
 ('Alice','Anderson','Female','1985-02-10','0701234001','alice.anderson@email.com','12 Oak Street, Paris'),
 ('Brian','Brown','Male','1978-06-22','0712345002','brian.brown@email.com','34 Pine Avenue, Lyon'),
 ('Catherine','Cole','Female','1992-11-05','0723456003','c.cole@email.com','56 Maple Road, Marseille'),
