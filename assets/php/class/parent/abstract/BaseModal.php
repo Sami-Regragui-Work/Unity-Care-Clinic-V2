@@ -171,4 +171,69 @@ abstract class BaseModal
 
         return $stmt->execute($values) && $stmt->rowCount() > 0;
     }
+
+    public function toArray(): array
+    {
+        $data = [];
+        $reflection = new ReflectionObject($this);
+
+        foreach ($reflection->getProperties() as $property) {
+            $propName = $property->getName();
+
+            if (in_array($propName, ['headers', 'idColName', 'pdo'])) {
+                continue;
+            }
+
+            $propName = match ($propName) {
+                'fName' => 'first_name',
+                'lName' => 'last_name',
+                'dOB' => 'date_of_birth',
+                'spec' => 'specialization',
+                'depId' => 'department_id',
+                default => $propName
+            };
+
+            $data[$propName] = $property->getValue($this);
+        }
+
+        return $data;
+    }
+
+    public function fromArray(array $data): self
+    {
+        $reflection = new ReflectionObject($this);
+
+        foreach ($data as $header => $value) {
+
+            $propName = match ($header) {
+                'first_name' => 'fName',
+                'last_name' => 'lName',
+                'date_of_birth' => 'dOB',
+                'specialization' => 'spec',
+                'department_id' => 'depId',
+                default => $header
+            };
+
+            if ($property = $reflection->getProperty($propName)) {
+                $property->setValue($this, $value);
+            }
+        }
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        $data = $this->toArray();
+        $lines = [];
+
+        foreach ($data as $key => $value) {
+            if ($value instanceof DateTime) {
+                $value = $value->format('Y-m-d');
+            }
+            $lines[] = ucfirst(str_replace('_', ' ', $key)) . ': ' . $value;
+        }
+
+        return implode("\n", $lines);
+    }
 }
