@@ -67,7 +67,7 @@ abstract class BaseModal
         }
     }
 
-    public function delete(int $id)
+    public function delete(int $id): bool
     {
         $tableName = $this->getValidTableName();
         $idColName = $this->getIdColName();
@@ -85,6 +85,48 @@ abstract class BaseModal
 
         return $stmt->execute() && $stmt->rowCount() > 0;
         // return "\n";
+    }
+
+    public static function getAll(PDO $pdo): array
+    {
+        $obj = new static($pdo);
+        $tableName = $obj->getValidTableName();
+
+        $sql = <<<SQL
+        SELECT *
+        FROM {$tableName}
+        SQL;
+        $stmt = $pdo->query($sql);
+        if ($stmt->execute()) {
+            $arr = [];
+            while ($row = $stmt->fetch()) {
+                $arr[] = array_values($row);
+            }
+            return $arr;
+        } else {
+            throw new Exception("\n" . $stmt->errorInfo()[2] . "\n");
+        }
+    }
+
+    public function getById(int $id): ?array
+    {
+        $tableName = $this->getValidTableName();
+        $idColName = $this->getIdColName();
+
+        $sql = <<<SQL
+        SELECT *
+        FROM {$tableName}
+        WHERE {$idColName} = :id
+        SQL;
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+
+        if ($stmt->execute()) {
+            return array_values($stmt->fetchAll());
+        } else {
+            throw new Exception("\n" . $stmt->errorInfo()[2] . "\n");
+        }
     }
 
     // public function save()

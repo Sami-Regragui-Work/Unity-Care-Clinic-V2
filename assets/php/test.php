@@ -6,6 +6,7 @@ require_once __DIR__ . "/class/config/DataBase.php";
 
 function printTable(array $headers, array $rows = []): void
 {
+    // hadi Ai
 
     // 1) Compute column widths (max of header/data)
     $widths = [];
@@ -48,10 +49,10 @@ function printTable(array $headers, array $rows = []): void
 
     // 4) Print rows
     foreach ($rows as $row) {
-        $line = '';
+        $line = '|';
         $i = 0;
         foreach ($row as $cell) {
-            $line .= ' ' . str_pad((string)$cell, $widths[$i], ' ') . ' ';
+            $line .= ' ' . str_pad((string)$cell, $widths[$i], ' ') . ' |';
             $i++;
         }
         echo $line . PHP_EOL;
@@ -79,13 +80,18 @@ $pdo = $db->getPdo();
 // $pdo->query($sql);
 // $id = (int) $pdo->lastInsertId();
 
-$id = 31;
+// $id = 31;
 
 $patient = new Patient($pdo);
 
-echo "$id\n";
-echo $patient->delete($id) . "\n";
+// echo "$id\n";
+// echo $patient->delete($id) . "\n";
 // var_dump($patient->getHeaders());
+
+// $assocArr = Patient::getAll($pdo);
+// printTable($patient->getHeaders(), $assocArr);
+printTable($patient->getHeaders(), $patient->getById(2));
+// var_dump($assocArr);
 
 // printTable($patient->getHeaders());
 // echo implode(" | ", $patient->getHeaders());
