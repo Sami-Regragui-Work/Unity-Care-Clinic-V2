@@ -63,6 +63,32 @@ class Patient extends Person
     {
         return 'patients';
     }
+
+    public function getStatistics(): array
+    {
+        $pdo = $this->getPdo();
+
+        $sql = <<<SQL
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN gender = 'Male' THEN 1 ELSE 0 END) as male,
+            SUM(CASE WHEN gender = 'Female' THEN 1 ELSE 0 END) as female,
+            SUM(CASE WHEN gender = 'Other' THEN 1 ELSE 0 END) as other,
+            ROUND(AVG(TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE())), 1) as avg_age
+        FROM patients
+        SQL;
+
+        $stmt = $pdo->query($sql);
+        $result = $stmt->fetch();
+
+        return [
+            'total' => (int) $result['total'],
+            'male' => (int) $result['male'],
+            'female' => (int) $result['female'],
+            'other' => (int) $result['other'],
+            'avg_age' => (float) $result['avg_age']
+        ];
+    }
 }
 
 // gender ENUM('Male', 'Female', 'Other'),

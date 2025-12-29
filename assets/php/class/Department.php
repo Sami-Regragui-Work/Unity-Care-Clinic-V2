@@ -51,6 +51,41 @@ class Department extends BaseModal
         }
         return $ids;
     }
+
+    public function getStatistics(): array
+    {
+        $pdo = $this->getPdo();
+
+        $sql = <<<SQL
+        SELECT COUNT(*) as total
+        FROM departments
+        SQL;
+
+        $stmt = $pdo->query($sql);
+        $result = $stmt->fetch();
+
+        $sqlDoctors = <<<SQL
+        SELECT d.name, COUNT(doc.id) as count
+        FROM departments d
+        LEFT JOIN doctors doc ON d.id = doc.department_id
+        GROUP BY d.id, d.name
+        ORDER BY count DESC
+        SQL;
+
+        $stmtDoctors = $pdo->query($sqlDoctors);
+        $doctorsPerDept = [];
+        while ($row = $stmtDoctors->fetch()) {
+            $doctorsPerDept[] = [
+                'name' => $row['name'],
+                'count' => (int) $row['count']
+            ];
+        }
+
+        return [
+            'total' => (int) $result['total'],
+            'doctors_per_department' => $doctorsPerDept
+        ];
+    }
 }
 
 

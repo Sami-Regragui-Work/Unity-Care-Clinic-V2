@@ -2,7 +2,6 @@
 
 abstract class BaseModal
 {
-    // private readonly string $tableName;
     private readonly array $headers;
     private readonly string $idColName;
 
@@ -13,7 +12,6 @@ abstract class BaseModal
     {
         $this->pdo = $pdo;
         $this->id = $id;
-        // $this->tableName = $this->getValidTableName();
         $this->headers = $this->fetchHeaders();
         $this->idColName = $this->getHeaders()[0];
     }
@@ -36,6 +34,11 @@ abstract class BaseModal
     public function setId(int $id): void
     {
         $this->id = $id;
+    }
+
+    protected function getPdo(): PDO
+    {
+        return $this->pdo;
     }
 
     abstract protected function getTableName(): string;
@@ -71,8 +74,6 @@ abstract class BaseModal
     {
         $tableName = $this->getValidTableName();
         $idColName = $this->getIdColName();
-        // echo $tableName;
-        // echo $idColName;
         $sql = <<<SQL
         DELETE FROM {$tableName}
         WHERE {$idColName} = :id
@@ -81,10 +82,7 @@ abstract class BaseModal
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(":id", $id, PDO::PARAM_INT);
 
-        // echo $stmt->execute();
-
         return $stmt->execute() && $stmt->rowCount() > 0;
-        // return "\n";
     }
 
     public static function getAll(PDO $pdo): array
@@ -108,7 +106,7 @@ abstract class BaseModal
         }
     }
 
-    public function getById(int $id): ?array
+    public function getById(int $id): array
     {
         $tableName = $this->getValidTableName();
         $idColName = $this->getIdColName();
@@ -123,7 +121,8 @@ abstract class BaseModal
         $stmt->bindParam(":id", $id, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
-            return array_values($stmt->fetchAll());
+            $result = $stmt->fetch();
+            return $result ? [array_values($result)] : [];
         } else {
             throw new Exception("\n" . $stmt->errorInfo()[2] . "\n");
         }
@@ -140,7 +139,7 @@ abstract class BaseModal
 
         $sql = <<<SQL
         INSERT INTO {$tableName} ($headersStr)
-        VALUES {$phsStr}
+        VALUES ($phsStr)
         SQL;
 
         $stmt = $this->pdo->prepare($sql);
@@ -167,7 +166,8 @@ abstract class BaseModal
 
         $stmt = $this->pdo->prepare($sql);
 
-        $values = array_values($assocRow) + [$id];
+        $values = array_values($assocRow);
+        $values[] = $id;
 
         return $stmt->execute($values) && $stmt->rowCount() > 0;
     }
@@ -236,4 +236,6 @@ abstract class BaseModal
 
         return implode("\n", $lines);
     }
+
+    abstract public function getStatistics(): array;
 }

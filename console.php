@@ -1,6 +1,12 @@
 <?php
 
-require_once "assets/php/class/composition/DataBase.php";
+require_once "assets/php/class/Patient.php";
+require_once "assets/php/class/Doctor.php";
+require_once "assets/php/class/Department.php";
+require_once "assets/php/class/config/DataBase.php";
+
+$db = DataBase::getTheOnlyDB();
+$pdo = $db->getPdo();
 
 do {
     system("clear");
@@ -13,26 +19,28 @@ do {
     5. Exit
     BASH . "\n\n";
 
-    $choice0 = htmlspecialchars(readline(), ENT_QUOTES, "UTF-8");
+    $choice0 = trim(readline("Enter choice: "));
 
     $repeat0 = match ($choice0) {
-        "1" => patientMenu(),
-        "2" => doctorMenu(),
-        "3" => departmentMenu(),
-        "4" => statisticsMenu(),
-        "5" => -1,
+        "1" => patientMenu($pdo),
+        "2" => doctorMenu($pdo),
+        "3" => departmentMenu($pdo),
+        "4" => statisticsMenu($pdo),
+        "5" => exitApp(),
         default => 1,
     };
-} while ($repeat0 > 0);
+} while ($repeat0 !== -1);
 
-echo "Thank you for using the Hospital Management System. Goodbye!\n\n";
+function exitApp(): int
+{
+    echo "Thank you for using the Hospital Management System. Goodbye!\n\n";
+    return -1;
+}
 
-// functions
-
-function patientMenu()
+function patientMenu(PDO $pdo): int
 {
     do {
-        // system("clear");
+        system("clear");
         echo <<<BASH
         === Patient Management ===
         1. List all patients
@@ -43,26 +51,26 @@ function patientMenu()
         6. Back
         BASH . "\n\n";
 
-        $choice = htmlspecialchars(readline(), ENT_QUOTES, "UTF-8");
+        $choice = trim(readline("Enter choice: "));
 
         $repeat = match ($choice) {
-            "1" => patientAction("1"),
-            "2" => patientAction("2"),
-            "3" => patientAction("3"),
-            "4" => patientAction("4"),
-            "5" => patientAction("5"),
+            "1" => listAllPatients($pdo),
+            "2" => searchPatient($pdo),
+            "3" => addPatient($pdo),
+            "4" => editPatient($pdo),
+            "5" => deletePatient($pdo),
             "6" => -1,
             default => 1,
         };
-    } while ($repeat > 0);
+    } while ($repeat !== -1);
 
     return 0;
 }
 
-function doctorMenu()
+function doctorMenu(PDO $pdo): int
 {
     do {
-        // system("clear");
+        system("clear");
         echo <<<BASH
         === Doctor Management ===
         1. List all doctors
@@ -73,26 +81,26 @@ function doctorMenu()
         6. Back
         BASH . "\n\n";
 
-        $choice = htmlspecialchars(readline(), ENT_QUOTES, "UTF-8");
+        $choice = trim(readline("Enter choice: "));
 
         $repeat = match ($choice) {
-            "1" => doctorAction("1"),
-            "2" => doctorAction("2"),
-            "3" => doctorAction("3"),
-            "4" => doctorAction("4"),
-            "5" => doctorAction("5"),
+            "1" => listAllDoctors($pdo),
+            "2" => searchDoctor($pdo),
+            "3" => addDoctor($pdo),
+            "4" => editDoctor($pdo),
+            "5" => deleteDoctor($pdo),
             "6" => -1,
             default => 1,
         };
-    } while ($repeat > 0);
+    } while ($repeat !== -1);
 
     return 0;
 }
 
-function departmentMenu()
+function departmentMenu(PDO $pdo): int
 {
     do {
-        // system("clear");
+        system("clear");
         echo <<<BASH
         === Department Management ===
         1. List all departments
@@ -103,26 +111,26 @@ function departmentMenu()
         6. Back
         BASH . "\n\n";
 
-        $choice = htmlspecialchars(readline(), ENT_QUOTES, "UTF-8");
+        $choice = trim(readline("Enter choice: "));
 
         $repeat = match ($choice) {
-            "1" => departmentAction("1"),
-            "2" => departmentAction("2"),
-            "3" => departmentAction("3"),
-            "4" => departmentAction("4"),
-            "5" => departmentAction("5"),
+            "1" => listAllDepartments($pdo),
+            "2" => searchDepartment($pdo),
+            "3" => addDepartment($pdo),
+            "4" => editDepartment($pdo),
+            "5" => deleteDepartment($pdo),
             "6" => -1,
             default => 1,
         };
-    } while ($repeat > 0);
+    } while ($repeat !== -1);
 
     return 0;
 }
 
-function statisticsMenu()
+function statisticsMenu(PDO $pdo): int
 {
     do {
-        // system("clear");
+        system("clear");
         echo <<<BASH
         === Statistics ===
         1. Patient statistics
@@ -132,93 +140,536 @@ function statisticsMenu()
         5. Back
         BASH . "\n\n";
 
-        $choice = htmlspecialchars(readline(), ENT_QUOTES, "UTF-8");
+        $choice = trim(readline("Enter choice: "));
 
         $repeat = match ($choice) {
-            "1" => statisticsAction("1"),
-            "2" => statisticsAction("2"),
-            "3" => statisticsAction("3"),
-            "4" => statisticsAction("4"),
+            "1" => showPatientStats($pdo),
+            "2" => showDoctorStats($pdo),
+            "3" => showDepartmentStats($pdo),
+            "4" => showOverallStats($pdo),
             "5" => -1,
             default => 1,
         };
-    } while ($repeat > 0);
+    } while ($repeat !== -1);
 
     return 0;
 }
 
-// Actions to be replaced
-function patientAction($action)
+function listAllPatients(PDO $pdo): int
 {
-    echo match ($action) {
-        "1" => "Listing all patients...\n",
-        "2" => "Searching for a patient...\n",
-        "3" => "Adding a new patient...\n",
-        "4" => "Editing a patient...\n",
-        "5" => "Deleting a patient...\n",
-        default => "Patient action not implemented.\n",
-    } . "\n\n";
-    readline("Press Enter to continue...");  // Pause
-    return $action;
+    echo "\n=== All Patients ===\n\n";
+    $patient = new Patient($pdo);
+    $rows = Patient::getAll($pdo);
+    printTable($patient->getHeaders(), $rows);
+    readline("\nPress Enter to continue...");
+    return 1;
 }
 
-function doctorAction($action)
+function searchPatient(PDO $pdo): int
 {
-    echo match ($action) {
-        "1" => "Listing all doctors...\n",
-        "2" => "Searching for a doctor...\n",
-        "3" => "Adding a new doctor...\n",
-        "4" => "Editing a doctor...\n",
-        "5" => "Deleting a doctor...\n",
-        default => "Doctor action not implemented.\n",
-    } . "\n\n";
-    readline("Press Enter to continue...");  // Pause
-    return $action;
+    echo "\n=== Search Patient ===\n";
+    $id = (int) trim(readline("Enter patient ID: "));
+
+    $patient = new Patient($pdo);
+    $result = $patient->getById($id);
+
+    if (empty($result)) {
+        echo "Patient not found.\n";
+    } else {
+        printTable($patient->getHeaders(), $result);
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
 }
 
-function departmentAction($action)
+function addPatient(PDO $pdo): int
 {
-    echo match ($action) {
-        "1" => "Listing all departments...\n",
-        "2" => "Searching for a department...\n",
-        "3" => "Adding a new department...\n",
-        "4" => "Editing a department...\n",
-        "5" => "Deleting a department...\n",
-        default => "Department action not implemented.\n",
-    } . "\n\n";
-    readline("Press Enter to continue...");  // Pause
-    return $action;
+    echo "\n=== Add New Patient ===\n";
+
+    $fName = trim(readline("First name: "));
+    $lName = trim(readline("Last name: "));
+    $phone = trim(readline("Phone: "));
+    $email = trim(readline("Email: "));
+    $genderInput = trim(readline("Gender (Male/Female/Other): "));
+    $dob = trim(readline("Date of birth (YYYY-MM-DD): "));
+    $address = trim(readline("Address: "));
+
+    $gender = match (strtolower($genderInput)) {
+        'male' => Genders::MALE,
+        'female' => Genders::FEMALE,
+        'other' => Genders::OTHER,
+        default => Genders::UNSET
+    };
+
+    $patient = new Patient($pdo, null, $fName, $lName, $phone, $email, $gender, new DateTime($dob), $address);
+
+    $data = $patient->toArray();
+    unset($data['id']);
+    $data['date_of_birth'] = $patient->getDOB()->format('Y-m-d');
+    $data['gender'] = $patient->getGender()->value;
+
+    $newId = $patient->add($data);
+
+    if ($newId) {
+        echo "\nPatient added successfully with ID: $newId\n";
+    } else {
+        echo "\nFailed to add patient.\n";
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
 }
 
-function statisticsAction($action)
+function editPatient(PDO $pdo): int
 {
-    echo match ($action) {
-        "1" => "Patient statistics...\n",
-        "2" => "Doctor statistics...\n",
-        "3" => "Department statistics...\n",
-        "4" => "Overall statistics...\n",
-        default => "Statistics not implemented.\n",
-    } . "\n\n";
-    readline("Press Enter to continue...");  // Pause
-    return $action;
+    echo "\n=== Edit Patient ===\n";
+    $id = (int) trim(readline("Enter patient ID to edit: "));
+
+    $patient = new Patient($pdo);
+    $result = $patient->getById($id);
+
+    if (empty($result)) {
+        echo "Patient not found.\n";
+        readline("\nPress Enter to continue...");
+        return 1;
+    }
+
+    echo "\nCurrent patient data:\n";
+    printTable($patient->getHeaders(), $result);
+
+    echo "\nEnter new values (press Enter to keep current value):\n";
+
+    $fName = trim(readline("First name [{$result[0][1]}]: ")) ?: $result[0][1];
+    $lName = trim(readline("Last name [{$result[0][2]}]: ")) ?: $result[0][2];
+    $genderInput = trim(readline("Gender [{$result[0][3]}]: ")) ?: $result[0][3];
+    $dob = trim(readline("Date of birth [{$result[0][4]}]: ")) ?: $result[0][4];
+    $phone = trim(readline("Phone [{$result[0][5]}]: ")) ?: $result[0][5];
+    $email = trim(readline("Email [{$result[0][6]}]: ")) ?: $result[0][6];
+    $address = trim(readline("Address [{$result[0][7]}]: ")) ?: $result[0][7];
+
+    $gender = match (strtolower($genderInput)) {
+        'male' => Genders::MALE,
+        'female' => Genders::FEMALE,
+        'other' => Genders::OTHER,
+        default => Genders::UNSET
+    };
+
+    $updatedPatient = new Patient($pdo, $id, $fName, $lName, $phone, $email, $gender, new DateTime($dob), $address);
+
+    $data = $updatedPatient->toArray();
+    unset($data['id']);
+    $data['date_of_birth'] = $updatedPatient->getDOB()->format('Y-m-d');
+    $data['gender'] = $updatedPatient->getGender()->value;
+
+    $success = $updatedPatient->update($id, $data);
+
+    if ($success) {
+        echo "\nPatient updated successfully.\n";
+    } else {
+        echo "\nFailed to update patient.\n";
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
 }
 
-// array structure for console with ai
+function deletePatient(PDO $pdo): int
+{
+    echo "\n=== Delete Patient ===\n";
+    $id = (int) trim(readline("Enter patient ID to delete: "));
+
+    $patient = new Patient($pdo);
+    $result = $patient->getById($id);
+
+    if (empty($result)) {
+        echo "Patient not found.\n";
+        readline("\nPress Enter to continue...");
+        return 1;
+    }
+
+    echo "\nPatient to delete:\n";
+    printTable($patient->getHeaders(), $result);
+
+    $confirm = trim(readline("\nAre you sure? (yes/no): "));
+
+    if (strtolower($confirm) === 'yes') {
+        $success = $patient->delete($id);
+
+        if ($success) {
+            echo "\nPatient deleted successfully.\n";
+        } else {
+            echo "\nFailed to delete patient.\n";
+        }
+    } else {
+        echo "\nDeletion cancelled.\n";
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function listAllDoctors(PDO $pdo): int
+{
+    echo "\n=== All Doctors ===\n\n";
+    $doctor = new Doctor($pdo);
+    $rows = Doctor::getAll($pdo);
+    printTable($doctor->getHeaders(), $rows);
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function searchDoctor(PDO $pdo): int
+{
+    echo "\n=== Search Doctor ===\n";
+    $id = (int) trim(readline("Enter doctor ID: "));
+
+    $doctor = new Doctor($pdo);
+    $result = $doctor->getById($id);
+
+    if (empty($result)) {
+        echo "Doctor not found.\n";
+    } else {
+        printTable($doctor->getHeaders(), $result);
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function addDoctor(PDO $pdo): int
+{
+    echo "\n=== Add New Doctor ===\n";
+
+    $fName = trim(readline("First name: "));
+    $lName = trim(readline("Last name: "));
+    $phone = trim(readline("Phone: "));
+    $email = trim(readline("Email: "));
+    $spec = trim(readline("Specialization: "));
+    $depId = trim(readline("Department ID (or leave empty): "));
+    $depId = $depId === '' ? null : (int) $depId;
+
+    $doctor = new Doctor($pdo, null, $fName, $lName, $phone, $email, $spec, $depId);
+
+    $data = $doctor->toArray();
+    unset($data['id']);
+
+    $newId = $doctor->add($data);
+
+    if ($newId) {
+        echo "\nDoctor added successfully with ID: $newId\n";
+    } else {
+        echo "\nFailed to add doctor.\n";
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function editDoctor(PDO $pdo): int
+{
+    echo "\n=== Edit Doctor ===\n";
+    $id = (int) trim(readline("Enter doctor ID to edit: "));
+
+    $doctor = new Doctor($pdo);
+    $result = $doctor->getById($id);
+
+    if (empty($result)) {
+        echo "Doctor not found.\n";
+        readline("\nPress Enter to continue...");
+        return 1;
+    }
+
+    echo "\nCurrent doctor data:\n";
+    printTable($doctor->getHeaders(), $result);
+
+    echo "\nEnter new values (press Enter to keep current value):\n";
+
+    $fName = trim(readline("First name [{$result[0][1]}]: ")) ?: $result[0][1];
+    $lName = trim(readline("Last name [{$result[0][2]}]: ")) ?: $result[0][2];
+    $spec = trim(readline("Specialization [{$result[0][3]}]: ")) ?: $result[0][3];
+    $phone = trim(readline("Phone [{$result[0][4]}]: ")) ?: $result[0][4];
+    $email = trim(readline("Email [{$result[0][5]}]: ")) ?: $result[0][5];
+    $depIdInput = trim(readline("Department ID [{$result[0][6]}]: "));
+    $depId = $depIdInput === '' ? $result[0][6] : ($depIdInput === 'null' ? null : (int) $depIdInput);
+
+    $updatedDoctor = new Doctor($pdo, $id, $fName, $lName, $phone, $email, $spec, $depId);
+
+    $data = $updatedDoctor->toArray();
+    unset($data['id']);
+
+    $success = $updatedDoctor->update($id, $data);
+
+    if ($success) {
+        echo "\nDoctor updated successfully.\n";
+    } else {
+        echo "\nFailed to update doctor.\n";
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function deleteDoctor(PDO $pdo): int
+{
+    echo "\n=== Delete Doctor ===\n";
+    $id = (int) trim(readline("Enter doctor ID to delete: "));
+
+    $doctor = new Doctor($pdo);
+    $result = $doctor->getById($id);
+
+    if (empty($result)) {
+        echo "Doctor not found.\n";
+        readline("\nPress Enter to continue...");
+        return 1;
+    }
+
+    echo "\nDoctor to delete:\n";
+    printTable($doctor->getHeaders(), $result);
+
+    $confirm = trim(readline("\nAre you sure? (yes/no): "));
+
+    if (strtolower($confirm) === 'yes') {
+        $success = $doctor->delete($id);
+
+        if ($success) {
+            echo "\nDoctor deleted successfully.\n";
+        } else {
+            echo "\nFailed to delete doctor.\n";
+        }
+    } else {
+        echo "\nDeletion cancelled.\n";
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function listAllDepartments(PDO $pdo): int
+{
+    echo "\n=== All Departments ===\n\n";
+    $department = new Department($pdo);
+    $rows = Department::getAll($pdo);
+    printTable($department->getHeaders(), $rows);
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function searchDepartment(PDO $pdo): int
+{
+    echo "\n=== Search Department ===\n";
+    $id = (int) trim(readline("Enter department ID: "));
+
+    $department = new Department($pdo);
+    $result = $department->getById($id);
+
+    if (empty($result)) {
+        echo "Department not found.\n";
+    } else {
+        printTable($department->getHeaders(), $result);
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function addDepartment(PDO $pdo): int
+{
+    echo "\n=== Add New Department ===\n";
+
+    $name = trim(readline("Department name: "));
+    $location = trim(readline("Location: "));
+
+    $department = new Department($pdo, null, $name, $location);
+
+    $data = $department->toArray();
+    unset($data['id']);
+
+    $newId = $department->add($data);
+
+    if ($newId) {
+        echo "\nDepartment added successfully with ID: $newId\n";
+    } else {
+        echo "\nFailed to add department.\n";
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function editDepartment(PDO $pdo): int
+{
+    echo "\n=== Edit Department ===\n";
+    $id = (int) trim(readline("Enter department ID to edit: "));
+
+    $department = new Department($pdo);
+    $result = $department->getById($id);
+
+    if (empty($result)) {
+        echo "Department not found.\n";
+        readline("\nPress Enter to continue...");
+        return 1;
+    }
+
+    echo "\nCurrent department data:\n";
+    printTable($department->getHeaders(), $result);
+
+    echo "\nEnter new values (press Enter to keep current value):\n";
+
+    $name = trim(readline("Department name [{$result[0][1]}]: ")) ?: $result[0][1];
+    $location = trim(readline("Location [{$result[0][2]}]: ")) ?: $result[0][2];
+
+    $updatedDepartment = new Department($pdo, $id, $name, $location);
+
+    $data = $updatedDepartment->toArray();
+    unset($data['id']);
+
+    $success = $updatedDepartment->update($id, $data);
+
+    if ($success) {
+        echo "\nDepartment updated successfully.\n";
+    } else {
+        echo "\nFailed to update department.\n";
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function deleteDepartment(PDO $pdo): int
+{
+    echo "\n=== Delete Department ===\n";
+    $id = (int) trim(readline("Enter department ID to delete: "));
+
+    $department = new Department($pdo);
+    $result = $department->getById($id);
+
+    if (empty($result)) {
+        echo "Department not found.\n";
+        readline("\nPress Enter to continue...");
+        return 1;
+    }
+
+    echo "\nDepartment to delete:\n";
+    printTable($department->getHeaders(), $result);
+
+    $confirm = trim(readline("\nAre you sure? (yes/no): "));
+
+    if (strtolower($confirm) === 'yes') {
+        $success = $department->delete($id);
+
+        if ($success) {
+            echo "\nDepartment deleted successfully.\n";
+        } else {
+            echo "\nFailed to delete department.\n";
+        }
+    } else {
+        echo "\nDeletion cancelled.\n";
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function showPatientStats(PDO $pdo): int
+{
+    echo "\n=== Patient Statistics ===\n\n";
+
+    $patient = new Patient($pdo);
+    $stats = $patient->getStatistics();
+
+    echo "Total Patients: {$stats['total']}\n";
+    echo "Male: {$stats['male']}\n";
+    echo "Female: {$stats['female']}\n";
+    echo "Other: {$stats['other']}\n";
+    echo "Average Age: {$stats['avg_age']} years\n";
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function showDoctorStats(PDO $pdo): int
+{
+    echo "\n=== Doctor Statistics ===\n\n";
+
+    $doctor = new Doctor($pdo);
+    $stats = $doctor->getStatistics();
+
+    echo "Total Doctors: {$stats['total']}\n";
+    echo "Doctors with Department: {$stats['with_department']}\n";
+    echo "Doctors without Department: {$stats['without_department']}\n";
+
+    if (!empty($stats['by_specialization'])) {
+        echo "\nDoctors by Specialization:\n";
+        foreach ($stats['by_specialization'] as $spec => $count) {
+            echo "  - {$spec}: {$count}\n";
+        }
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function showDepartmentStats(PDO $pdo): int
+{
+    echo "\n=== Department Statistics ===\n\n";
+
+    $department = new Department($pdo);
+    $stats = $department->getStatistics();
+
+    echo "Total Departments: {$stats['total']}\n";
+
+    if (!empty($stats['doctors_per_department'])) {
+        echo "\nDoctors per Department:\n";
+        foreach ($stats['doctors_per_department'] as $dept) {
+            echo "  - {$dept['name']}: {$dept['count']} doctor(s)\n";
+        }
+    }
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
+
+function showOverallStats(PDO $pdo): int
+{
+    echo "\n=== Overall System Statistics ===\n\n";
+
+    $patient = new Patient($pdo);
+    $doctor = new Doctor($pdo);
+    $department = new Department($pdo);
+
+    $patientStats = $patient->getStatistics();
+    $doctorStats = $doctor->getStatistics();
+    $departmentStats = $department->getStatistics();
+
+    echo "PATIENTS:\n";
+    echo "  Total: {$patientStats['total']}\n";
+    echo "  Male: {$patientStats['male']}\n";
+    echo "  Female: {$patientStats['female']}\n";
+    echo "  Other: {$patientStats['other']}\n";
+    echo "  Average Age: {$patientStats['avg_age']} years\n\n";
+
+    echo "DOCTORS:\n";
+    echo "  Total: {$doctorStats['total']}\n";
+    echo "  With Department: {$doctorStats['with_department']}\n";
+    echo "  Without Department: {$doctorStats['without_department']}\n\n";
+
+    echo "DEPARTMENTS:\n";
+    echo "  Total: {$departmentStats['total']}\n";
+
+    readline("\nPress Enter to continue...");
+    return 1;
+}
 
 function printTable(array $headers, array $rows = []): void
 {
-    // hadi Ai
-
-    // 1) Compute column widths (max of header/data)
     $widths = [];
     $colCount = count($headers);
 
-    // Initialize from headers
     foreach ($headers as $i => $header) {
         $widths[$i] = strlen((string)$header);
     }
 
-    // Update with data
     foreach ($rows as $row) {
         $i = 0;
         foreach ($row as $cell) {
@@ -230,25 +681,20 @@ function printTable(array $headers, array $rows = []): void
         }
     }
 
-    // 2) Build horizontal border: all '-' with exact width per column
-    // For each column: 1 space + content width + 1 space
     $border = '-';
     foreach ($widths as $w) {
         $border .= str_repeat('-', $w + 3);
     }
 
-    // 3) Print header
     echo $border . PHP_EOL;
 
     $headerLine = '|';
     foreach ($headers as $i => $header) {
-        // one leading space, padded content, one trailing space
         $headerLine .= ' ' . str_pad((string)$header, $widths[$i], ' ') . ' |';
     }
     echo $headerLine . PHP_EOL;
     echo $border . PHP_EOL;
 
-    // 4) Print rows
     foreach ($rows as $row) {
         $line = '|';
         $i = 0;
@@ -258,5 +704,5 @@ function printTable(array $headers, array $rows = []): void
         }
         echo $line . PHP_EOL;
     }
-    if (!empty($row)) echo $border . PHP_EOL;
+    if (!empty($rows)) echo $border . PHP_EOL;
 }

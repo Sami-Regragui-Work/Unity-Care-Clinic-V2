@@ -50,6 +50,42 @@ class Doctor extends Person
     {
         $this->depId = in_array($depId, Department::getIds($pdo)) ? $depId : null;
     }
+    public function getStatistics(): array
+    {
+        $pdo = $this->getPdo();
+
+        $sql = <<<SQL
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN department_id IS NOT NULL THEN 1 ELSE 0 END) as with_department,
+            SUM(CASE WHEN department_id IS NULL THEN 1 ELSE 0 END) as without_department
+        FROM doctors
+        SQL;
+
+        $stmt = $pdo->query($sql);
+        $result = $stmt->fetch();
+
+        $sqlSpec = <<<SQL
+        SELECT specialization, COUNT(*) as count
+        FROM doctors
+        WHERE specialization IS NOT NULL AND specialization != ''
+        GROUP BY specialization
+        ORDER BY count DESC
+        SQL;
+
+        $stmtSpec = $pdo->query($sqlSpec);
+        $bySpec = [];
+        while ($row = $stmtSpec->fetch()) {
+            $bySpec[$row['specialization']] = (int) $row['count'];
+        }
+
+        return [
+            'total' => (int) $result['total'],
+            'with_department' => (int) $result['with_department'],
+            'without_department' => (int) $result['without_department'],
+            'by_specialization' => $bySpec
+        ];
+    }
 }
 
 // specialization VARCHAR(50),
