@@ -129,16 +129,46 @@ abstract class BaseModal
         }
     }
 
-    // public function save()
-    // {
-    //     return; //success?
-    // }
-    // public function delete()
-    // {
-    //     return; //success?
-    // }
-    // public function findById($headers)
-    // {
-    //     return; //row or null
-    // }
+    public function add(array $assocRow): int | false
+    {
+        $tableName = $this->getValidTableName();
+
+        $pHsArr = array_fill(0, count($assocRow), '?');
+        $phsStr = implode(", ", $pHsArr);
+
+        $headersStr = implode(", ", array_slice($this->getHeaders(), 1));
+
+        $sql = <<<SQL
+        INSERT INTO {$tableName} ($headersStr)
+        VALUES {$phsStr}
+        SQL;
+
+        $stmt = $this->pdo->prepare($sql);
+        if ($stmt->execute(array_values($assocRow)))
+            return (int) $this->pdo->lastInsertId();
+        return false;
+    }
+
+    public function update(int $id, array $assocRow): bool
+    {
+        $tableName = $this->getValidTableName();
+        $idColName = $this->getIdColName();
+
+        $headersArr = array_slice($this->getHeaders(), 1);
+
+        $setArr = array_map(fn($header) => "$header = ?", $headersArr);
+        $setStr = implode(", ", $setArr);
+
+        $sql = <<<SQL
+        UPDATE {$tableName}
+        SET {$setStr}
+        WHERE {$idColName} = ?
+        SQL;
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $values = array_values($assocRow) + [$id];
+
+        return $stmt->execute($values) && $stmt->rowCount() > 0;
+    }
 }

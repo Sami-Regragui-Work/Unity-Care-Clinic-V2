@@ -95,3 +95,5 @@ printTable($patient->getHeaders(), $patient->getById(2));
 
 // printTable($patient->getHeaders());
 // echo implode(" | ", $patient->getHeaders());
+
+
