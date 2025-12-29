@@ -1,35 +1,44 @@
+// Unity Care Clinic V2 - Entity Relationship Diagram
+// Database: UCCV2
 
-Enum "ENUM('Male', 'Female', 'Other')" {
+Enum gender_enum {
   "Male"
   "Female"
   "Other"
 }
 
-Table "patients" {
-  "patient_id" INT [pk, increment]
-  "first_name" VARCHAR(50) [not null]
-  "last_name" VARCHAR(50) [not null]
-  "gender" ENUM('Male', 'Female', 'Other')
-  "date_of_birth" DATE
-  "phone_number" VARCHAR(15) [unique, not null]
-  "email" VARCHAR(100) [unique]
-  "address" VARCHAR(255)
+Table patients {
+  id INT [pk, increment, note: 'Patient ID']
+  first_name VARCHAR(50) [not null, note: 'Patient first name']
+  last_name VARCHAR(50) [not null, note: 'Patient last name']
+  gender gender_enum [note: 'Patient gender']
+  date_of_birth DATE [note: 'Patient date of birth']
+  phone VARCHAR(15) [unique, not null, note: 'Patient phone number']
+  email VARCHAR(100) [unique, note: 'Patient email address']
+  address VARCHAR(255) [note: 'Patient physical address']
+  
+  Note: 'Stores patient information including personal details and contact info'
 }
 
-Table "departments" {
-  "department_id" INT [pk, increment]
-  "department_name" VARCHAR(50) [unique, not null]
-  "location" VARCHAR(100) [not null]
+Table departments {
+  id INT [pk, increment, note: 'Department ID']
+  name VARCHAR(50) [unique, not null, note: 'Department name']
+  location VARCHAR(100) [not null, note: 'Department location/floor']
+  
+  Note: 'Stores clinic departments like Cardiology, Pediatrics, etc.'
 }
 
-Table "doctors" {
-  "doctor_id" INT [pk, increment]
-  "first_name" VARCHAR(50) [not null]
-  "last_name" VARCHAR(50) [not null]
-  "specialiazation" VARCHAR(50)
-  "phone_number" VARCHAR(15) [unique, not null]
-  "email" VARCHAR(100) [unique, not null]
-  "department_id" INT [not null]
+Table doctors {
+  id INT [pk, increment, note: 'Doctor ID']
+  first_name VARCHAR(50) [not null, note: 'Doctor first name']
+  last_name VARCHAR(50) [not null, note: 'Doctor last name']
+  specialization VARCHAR(50) [note: 'Doctor medical specialization']
+  phone VARCHAR(15) [unique, not null, note: 'Doctor phone number']
+  email VARCHAR(100) [unique, not null, note: 'Doctor email address']
+  department_id INT [null, note: 'Foreign key to departments table']
+  
+  Note: 'Stores doctor information and their department assignment'
 }
 
-Ref "doctors_departements":"departments"."department_id" < "doctors"."department_id"
+// Relationships
+Ref doctors_departments: doctors.department_id > departments.id
