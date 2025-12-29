@@ -55,6 +55,7 @@ abstract class BaseModal
         FROM INFORMATION_SCHEMA.COLUMNS
         WHERE TABLE_SCHEMA = 'UCCV2'
         AND TABLE_NAME = :tableName
+        ORDER BY ORDINAL_POSITION
         SQL;
 
         $stmt = $this->pdo->prepare($sql);
@@ -64,6 +65,26 @@ abstract class BaseModal
         } else {
             throw new Exception("\n" . $stmt->errorInfo()[2] . "\n");
         }
+    }
+
+    public function delete(int $id)
+    {
+        $tableName = $this->getValidTableName();
+        $idColName = $this->getIdColName();
+        // echo $tableName;
+        // echo $idColName;
+        $sql = <<<SQL
+        DELETE FROM {$tableName}
+        WHERE {$idColName} = :id
+        SQL;
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+
+        // echo $stmt->execute();
+
+        return $stmt->execute() && $stmt->rowCount() > 0;
+        // return "\n";
     }
 
     // public function save()

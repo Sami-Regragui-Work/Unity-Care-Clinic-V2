@@ -1,6 +1,7 @@
 <?php
 
 include __DIR__ . "/class/Doctor.php";
+include __DIR__ . "/class/Patient.php";
 require_once __DIR__ . "/class/config/DataBase.php";
 
 function printTable(array $headers, array $rows = []): void
@@ -65,11 +66,26 @@ function printTable(array $headers, array $rows = []): void
 $db = DataBase::getTheOnlyDB();
 $pdo = $db->getPdo();
 
-$doctor = new Doctor($pdo, depId: 10);
+// $doctor = new Doctor($pdo, depId: 10);
 
-$isItNull = $doctor->getDepId() == null;
+// $isItNull = $doctor->getDepId() == null;
 
-echo $isItNull . PHP_EOL;
+// echo $isItNull . PHP_EOL;
 
-// printTable($doctor->getHeaders());
+// $sql = <<<SQL
+// INSERT INTO `patients` ( first_name, last_name, gender, date_of_birth, phone, email, address )
+// VALUES ("test", "test", "Other", "2025-01-01", "0611223344", "test@test.com", "test")
+// SQL;
+// $pdo->query($sql);
+// $id = (int) $pdo->lastInsertId();
+
+$id = 31;
+
+$patient = new Patient($pdo);
+
+echo "$id\n";
+echo $patient->delete($id) . "\n";
+// var_dump($patient->getHeaders());
+
+// printTable($patient->getHeaders());
 // echo implode(" | ", $patient->getHeaders());
